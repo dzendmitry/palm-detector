@@ -11,8 +11,13 @@ class Settings : public QDialog
 	Q_OBJECT
 
 public:
-	Settings(QWidget *parent = 0);
-	~Settings();
+	Settings(QWidget *parent = 0)
+		: QDialog(parent) {
+			ui.setupUi(this);
+			connect(ui.checkBoxDebug, SIGNAL(clicked(bool)), this, SLOT(changeDebugMode(bool)));
+			connect(ui.checkBoxCanny, SIGNAL(clicked(bool)), this, SLOT(changeCannyMode(bool)));
+			connect(ui.checkBoxShowContours, SIGNAL(clicked(bool)), this, SLOT(changeShowContoursMode(bool)));
+	}
 
 signals:
 	void cannyModeChanged();

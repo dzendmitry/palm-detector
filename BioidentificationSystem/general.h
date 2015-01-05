@@ -14,12 +14,6 @@ extern bool CANNY_STEP;
 extern bool SHOW_CONTOURS;
 const bool DEBUG = false;
 
-enum ErrorLevels {
-	CRITICAL,
-	WARNING,
-	INFORMATION
-};
-
 const int CRITICAL_READ_FRAME_FAILS = 24;
 const int OPENMP_THREADS = 2;
 

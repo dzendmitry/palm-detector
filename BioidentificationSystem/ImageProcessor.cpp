@@ -6,21 +6,13 @@
 ImageProcessor::ImageProcessor(QObject *parent)
 	: Camera(parent),
 	pixelClassifierTrained(false),
-	horizontal(true),
-	mergeTimes(0),
 	isPhotoMode(false),
-	photoProcessingMode(false),
-	caddr(1),
-	doRGBArray(false)
+	photoProcessingMode(false)
 {
 	paramS = KERNEL_PARAM_S;
-	apertureFilter = APERTURE_FILTER;
 	lowThreshold = LOW_THRESHOLD;
 	ratio = RATIO;
 	aperture = APERTURE;
-	dilateSize = DILATION;
-	erodeSize = EROSION;
-	openedMatSize = OPENING;
 	cannyContourMergeEps = CANNY_CONTOUR_MERGE_EPS;
 	handThreshold = HAND_THRESHOLD / 10.0;
 	approxPoly = APPROX_POLY;
@@ -36,7 +28,6 @@ void ImageProcessor::imageProcState(bool state)
 		startState = GET_FRAME;
 		pixelClassifierTrained = false;
 		isPhotoMode = true;
-		caddr = 1;
 		processImage(OPEN_CAM);
 	} else {
 		fclose(logFile);
@@ -55,7 +46,7 @@ void ImageProcessor::takePhoto()
 {
 	if(!Camera::takeFrame())
 	{
-		emit error("Can't take photo.", WARNING);
+		emit error("Can't take photo.", QMessageBox::Warning);
 		return;
 	}
 	emit photoTaken();
@@ -93,14 +84,6 @@ cv::Mat ImageProcessor::getClassifiedSkin()
 	return mat;
 }
 
-cv::Mat ImageProcessor::getClassifiedSkinFiltered()
-{
-	classifiedSkinMutex.lock();
-	cv::Mat mat = classifiedSkinFiltered.clone();
-	classifiedSkinMutex.unlock();
-	return mat;
-}
-
 cv::Mat ImageProcessor::getColorizedFrame()
 {
 	classifiedSkinMutex.lock();
@@ -117,43 +100,11 @@ cv::Mat ImageProcessor::getCannyEdges()
 	return mat;
 }
 
-cv::Mat ImageProcessor::getCannyEdgesOrig()
+cv::Mat ImageProcessor::getBended()
 {
-	cannyEdgesMutex.lock();
-	cv::Mat mat = cannyEdgesOrig.clone();
-	cannyEdgesMutex.unlock();
-	return mat;
-}
-
-cv::Mat ImageProcessor::getMorphologyDilation()
-{
-	dilatedMutex.lock();
-	cv::Mat mat = dilated.clone();
-	dilatedMutex.unlock();
-	return mat;
-}
-
-cv::Mat ImageProcessor::getPixelsAndCanny()
-{
-	pixelsAndCannyMutex.lock();
-	cv::Mat mat = pixelsAndCanny.clone();
-	pixelsAndCannyMutex.unlock();
-	return mat;
-}
-
-cv::Mat ImageProcessor::getMorphologyErode()
-{
-	erodedMutex.lock();
-	cv::Mat mat = eroded.clone();
-	erodedMutex.unlock();
-	return mat;
-}
-
-cv::Mat ImageProcessor::getMorphologyOpening()
-{
-	openedMatMutex.lock();
-	cv::Mat mat = openedMat.clone();
-	openedMatMutex.unlock();
+	recognizedHandMutex.lock();
+	cv::Mat mat = bended.clone();
+	recognizedHandMutex.unlock();
 	return mat;
 }
 
@@ -188,7 +139,7 @@ void ImageProcessor::processImage(ImageProcessor::States state)
 		if(!Camera::open()) {
 			stop = true;
 			nextState = STOP;
-			emit error("Can't open camera.", CRITICAL);
+			emit error("Can't open camera.", QMessageBox::Critical);
 			emit closed();
 		} else {
 			nextState = GET_FRAME;
@@ -201,42 +152,12 @@ void ImageProcessor::processImage(ImageProcessor::States state)
 			stop = true;
 			nextState = STOP;
 		} else if(!Camera::takeFrame()) {
-			emit error("Can't read frame.", WARNING);
+			emit error("Can't read frame.", QMessageBox::Warning);
 			nextState = CLOSE_CAM;
 		} else if(!stop && isPhotoMode) {
 			emit stateCompleted(GET_FRAME);
 			nextState = GET_FRAME;
 		} else if(!stop) {
-			/* SMOOTH_FILTER */
-			/*int currCaddr = caddr % THRES_CADDR;
-			if( currCaddr == 0 ) {
-				c3 = frame.clone();
-				for(int i = 0; i < frame.rows; i++)
-				{
-					for(int j = 0; j < frame.cols; j++)
-					{
-						frame.at<cv::Vec3b>(i, j).val[0] = (c1.at<cv::Vec3b>(i, j).val[0] + c2.at<cv::Vec3b>(i, j).val[0] + c3.at<cv::Vec3b>(i, j).val[0]) / 3;
-						frame.at<cv::Vec3b>(i, j).val[1] = (c1.at<cv::Vec3b>(i, j).val[1] + c2.at<cv::Vec3b>(i, j).val[1] + c3.at<cv::Vec3b>(i, j).val[1]) / 3;
-						frame.at<cv::Vec3b>(i, j).val[2] = (c1.at<cv::Vec3b>(i, j).val[2] + c2.at<cv::Vec3b>(i, j).val[2] + c3.at<cv::Vec3b>(i, j).val[2]) / 3;
-					}
-				}
-				caddr = 1;
-				emit stateCompleted(GET_FRAME);
-				if(DEBUG)
-					writeTime("GET_FRAME", ((float)(clock()-startTime))/CLOCKS_PER_SEC);
-				nextState = FIND_FACE;
-			} else {
-				switch(currCaddr) {
-				case 1:
-					c1 = frame.clone();
-					break;
-				case 2:
-					c2 = frame.clone();
-					break;
-				}
-				caddr++;
-				nextState = GET_FRAME;
-			}*/
 			emit stateCompleted(GET_FRAME);
 			nextState = FIND_FACE;
 		} else
@@ -249,7 +170,7 @@ void ImageProcessor::processImage(ImageProcessor::States state)
 			break;
 		}
 		if(!findFace()) {
-			emit error("Can't load face cascade file: " + FACE_CASCADE_NAME, CRITICAL);
+			emit error("Can't load face cascade file: " + FACE_CASCADE_NAME, QMessageBox::Critical);
 			nextState = CLOSE_CAM;
 		} else if(face.data == NULL) {
 			if(!stop && !isPhotoMode)
@@ -287,7 +208,7 @@ void ImageProcessor::processImage(ImageProcessor::States state)
 			break;
 		}
 		if(!trainPixelClassifier()) {
-			emit error("Training pixel classifier failed.", CRITICAL);
+			emit error("Training pixel classifier failed.", QMessageBox::Critical);
 			nextState = CLOSE_CAM;
 		} else 
 			nextState = PIXEL_RECOGNITION;
@@ -316,93 +237,13 @@ void ImageProcessor::processImage(ImageProcessor::States state)
 			break;
 		}
 		if(ADVANCED_OUTPUT)
-		{
 			cv::imshow("CANNY", cannyEdges);
-			//cv::imshow("CANNY_ORIG", cannyEdgesOrig);
-			//cv::imshow("FRAME_GRAY", frameGray);
-			//cv::imshow("FRAME_GRAY_ORIG", frameGrayOrig);
-		}
 		doCanny();
 		if(!stop && !isPhotoMode)
 			emit stateCompleted(CANNY);
-		mergeTimes = 0;
-		nextState = MOPRPHOLOGY_DILATION;
-		if(DEBUG)
-			writeTime("CANNY", ((float)(clock()-startTime))/CLOCKS_PER_SEC);
-		break;
-	case MOPRPHOLOGY_DILATION: // NOT USED
-		{
-			startTime = clock();
-			if(stop) {
-				nextState = STOP;
-				break;
-			}
-			if(ADVANCED_OUTPUT)
-				cv::imshow("MOPRPHOLOGY_DILATION", dilated);
-			morphologyDilation();
-			if(!stop && !isPhotoMode)
-				emit stateCompleted(MOPRPHOLOGY_DILATION);
-			nextState = MORPHOLOGY_ERODE;
-			if(DEBUG)
-				writeTime("MOPRPHOLOGY_DILATION", ((float)(clock()-startTime))/CLOCKS_PER_SEC);
-		}
-		break;
-	case MERGE_PIXELS_AND_CANNY:
-		startTime = clock();
-		if(stop) {
-			nextState = STOP;
-			break;
-		}
-		if(ADVANCED_OUTPUT)
-			cv::imshow("MERGE_PIXELS_AND_CANNY", pixelsAndCanny);
-		switch(mergeTimes)
-		{
-		case 0:
-			mergePixelsAndCanny(true);
-			mergeTimes++;
-			nextState = MERGE_PIXELS_AND_CANNY;
-		case 1:
-			mergePixelsAndCanny(false);
-			mergeTimes++;
-			nextState = MERGE_PIXELS_AND_CANNY;
-		default:
-			if(!stop && !isPhotoMode)
-				emit stateCompleted(MERGE_PIXELS_AND_CANNY);
-			mergeTimes = 0;
-			nextState = MORPHOLOGY_ERODE;
-		}
-		if(DEBUG)
-			writeTime("MERGE_PIXELS_AND_CANNY", ((float)(clock()-startTime))/CLOCKS_PER_SEC);
-		break;
-	case MORPHOLOGY_ERODE:
-		startTime = clock();
-		if(stop) {
-			nextState = STOP;
-			break;
-		}
-		if(ADVANCED_OUTPUT)
-			cv::imshow("MORPHOLOGY_ERODE", eroded);
-		morphologyErode();
-		if(!stop && !isPhotoMode)
-			emit stateCompleted(MORPHOLOGY_ERODE);
-		nextState = MORPHOLOGY_OPENING;
-		if(DEBUG)
-			writeTime("MORPHOLOGY_ERODE", ((float)(clock()-startTime))/CLOCKS_PER_SEC);
-		break;
-	case MORPHOLOGY_OPENING:
-		startTime = clock();
-		if(stop) {
-			nextState = STOP;
-			break;
-		}
-		if(ADVANCED_OUTPUT)
-			cv::imshow("MORPHOLOGY_OPENING", openedMat);
-		morphologyOpening();
-		//if(!stop && !isPhotoMode)
-		//	emit stateCompleted(MORPHOLOGY_OPENING);
 		nextState = HAND_RECOGNITION;
 		if(DEBUG)
-			writeTime("MORPHOLOGY_OPENING", ((float)(clock()-startTime))/CLOCKS_PER_SEC);
+			writeTime("CANNY", ((float)(clock()-startTime))/CLOCKS_PER_SEC);
 		break;
 	case HAND_RECOGNITION:
 		startTime = clock();
@@ -411,7 +252,7 @@ void ImageProcessor::processImage(ImageProcessor::States state)
 			break;
 		}
 		if(!stop && !isPhotoMode) {
-			emit stateCompleted(MORPHOLOGY_OPENING);
+			emit stateCompleted(BEND);
 			emit stateCompleted(HAND_RECOGNITION);
 		}
 		nextState = startState;
@@ -483,13 +324,7 @@ bool ImageProcessor::trainPixelClassifier()
 			pixels.push_back(Pixel(bgrPixel.val[2], bgrPixel.val[1], bgrPixel.val[0]));
 		}
 	}
-	int p = (paramS-50) / 6;
-	pixelClassifierTrained  = pixelClassifier50.train(pixels, 50 + p, 1, 0.001);
-	pixelClassifierTrained &= pixelClassifier60.train(pixels, 50+2*p, 1, 0.001);
-	pixelClassifierTrained &= pixelClassifier70.train(pixels, 50+3*p, 1, 0.001);
-	pixelClassifierTrained &= pixelClassifier80.train(pixels, 50+4*p, 1, 0.001);
-	pixelClassifierTrained &= pixelClassifier90.train(pixels, 50+5*p, 1, 0.001);
-	pixelClassifierTrained &= pixelClassifier100.train(pixels,50+6*p, 1, 0.001);
+	pixelClassifierTrained  = pixelClassifier.train(pixels, paramS, 1, 0.001);
 	if(!pixelClassifierTrained)
 		return false;
 	return true;
@@ -501,8 +336,6 @@ void ImageProcessor::pixelRecognition()
 	colorizedFrame = frame.clone();
 	classifiedSkin = cv::Mat(frame.rows, frame.cols, CV_8UC1);
 	classifiedSkin.setTo(cv::Scalar(0));
-	classifiedSkinBin = cv::Mat(frame.rows, frame.cols, CV_8UC1);
-	classifiedSkinBin.setTo(cv::Scalar(0));
 	#pragma omp parallel num_threads(OPENMP_THREADS)
 	{
 		#pragma omp for
@@ -513,148 +346,14 @@ void ImageProcessor::pixelRecognition()
 				cv::Vec3b bgrPixel = frame.at<cv::Vec3b>(i, j);
 				if(faceRect.contains(cv::Point(j, i)))
 					continue;
-				if( pixelClassifier100.classify(Pixel(bgrPixel.val[2], bgrPixel.val[1], bgrPixel.val[0])) ) 
+				if( pixelClassifier.classify(Pixel(bgrPixel.val[2], bgrPixel.val[1], bgrPixel.val[0])) )
 				{
-					classifiedSkin.at<uchar>(i, j) = 100;
-					classifiedSkinBin.at<uchar>(i, j) = 255;
-					colorizedFrame.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 100, 0);
-					if( pixelClassifier90.classify(Pixel(bgrPixel.val[2], bgrPixel.val[1], bgrPixel.val[0])) ) 
-					{
-						classifiedSkin.at<uchar>(i, j) = 130;
-						colorizedFrame.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 130, 0);
-						if( pixelClassifier80.classify(Pixel(bgrPixel.val[2], bgrPixel.val[1], bgrPixel.val[0])) ) 
-						{
-							classifiedSkin.at<uchar>(i, j) = 160;
-							colorizedFrame.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 160, 0);
-							if( pixelClassifier70.classify(Pixel(bgrPixel.val[2], bgrPixel.val[1], bgrPixel.val[0])) ) 
-							{
-								classifiedSkin.at<uchar>(i, j) = 190;
-								colorizedFrame.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 190, 0);
-								if( pixelClassifier60.classify(Pixel(bgrPixel.val[2], bgrPixel.val[1], bgrPixel.val[0])) ) 
-								{
-									classifiedSkin.at<uchar>(i, j) = 220;
-									colorizedFrame.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 220, 0);
-									if( pixelClassifier50.classify(Pixel(bgrPixel.val[2], bgrPixel.val[1], bgrPixel.val[0])) )
-									{
-										classifiedSkin.at<uchar>(i, j) = 250;
-										colorizedFrame.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 250, 0);
-									}
-								}
-							}
-						}
-					}
+					classifiedSkin.at<uchar>(i, j) = 255;
+					colorizedFrame.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 255, 0);
 				}
 			}
 		}
 	}
-	/* APERTURE_FILTER */
-	classifiedSkinFiltered = classifiedSkin.clone();
-	/*#pragma omp parallel num_threads(OPENMP_THREADS)
-	{
-		unsigned colors[2];
-		#pragma omp for
-		for(int i = 0; i < classifiedSkin.rows; i++)
-		{
-			for(int j = 0; j < (classifiedSkin.cols - apertureFilter); j++)
-			{
-				colors[BLACK] = colors[WHITE] = 0;
-				for(int k = j; k < (j + apertureFilter); k++)
-				{
-					if(classifiedSkin.at<uchar>(i, k) > 0)
-						colors[WHITE]++;
-					else
-						colors[BLACK]++;
-				}
-				uchar color = 255;
-				if(colors[BLACK] > colors[WHITE])
-					color = 0;
-				for(int k = j; k < (j + apertureFilter); k++)
-				{
-					uchar pixelColor = classifiedSkin.at<uchar>(i, k);
-					if( (color == 0) || ( (color == 255) && (pixelColor == 0) ) )
-						classifiedSkinFiltered.at<uchar>(i, k) = color;
-				}
-			}
-		}
-	}*/
-	
-	/* 3-D ARRAY */
-	if(doRGBArray)
-	{
-		float ***rgbArray = new float**[256];
-		for(int i = 0; i < 256; i++)
-			rgbArray[i] = new float*[256];
-		for(int i = 0; i < 256; i++)
-			for(int j = 0; j < 256; j++)
-				rgbArray[i][j] = new float[256];
-
-		#pragma omp parallel num_threads(OPENMP_THREADS)
-		{
-		#pragma omp for
-		for(int r = 0; r < 256; r++) // R 
-			for(int g = 0; g < 256; g++) // G
-				for(int b = 0; b < 256; b++) // B
-				{
-					rgbArray[r][g][b] = 0;
-					if( pixelClassifier100.classify(Pixel(r, g, b)) ) 
-					{
-						rgbArray[r][g][b] = 0.1;
-						if( pixelClassifier90.classify(Pixel(r, g, b)) ) 
-						{
-							rgbArray[r][g][b] = 0.2;
-							if( pixelClassifier80.classify(Pixel(r, g, b)) ) 
-							{
-								rgbArray[r][g][b] = 0.4;
-								if( pixelClassifier70.classify(Pixel(r, g, b)) ) 
-								{
-									rgbArray[r][g][b] = 0.6;
-									if( pixelClassifier60.classify(Pixel(r, g, b)) ) 
-									{
-										rgbArray[r][g][b] = 0.8;
-										if( pixelClassifier50.classify(Pixel(r, g, b)) )
-											rgbArray[r][g][b] = 1.0;
-									}
-								}
-							}
-						}
-					}
-				}
-		}
-
-				/* SAVE SKIN RECT */
-				FILE *skinRectF = fopen("ex/skin_rect.txt", "w");
-				if(skinRectF)
-					fprintf(skinRectF, "x: %d y: %d\nwidth: %d height: %d", skinRect.x, skinRect.y, skinRect.width, skinRect.height);
-				fclose(skinRectF);
-				/* SAVE SKIN COLOR */
-				saveImage(skinColor, "skin_rect.bmp", "ex/");
-				/* SAVE IMG */
-				saveImage(frame, "frame.bmp", "ex/");
-				/* SAVE IMG WITH SKIN RECT */
-				cv::Mat mat = frame.clone();
-				cv::rectangle(mat, skinRect, cv::Scalar(0, 0, 255), 1);
-				saveImage(mat, "frame_skin_rect.bmp", "ex/");
-				/* SAVE COLORIZED IMG */
-				saveImage(colorizedFrame, "colorized_frame.bmp", "ex/");
-				/* SAVE RGB ARRAY */
-				FILE *rgbArrayF = fopen("ex/rgb_array.txt", "w");
-				for(int r = 0; r < 256; r++)
-					for(int g = 0; g < 256; g++)
-						for(int b = 0; b < 256; b++)
-							if(rgbArrayF)
-								fprintf(rgbArrayF, "%.1f ", rgbArray[r][g][b]);
-				fclose(rgbArrayF);
-
-				for(int j = 0; j < 256; j++)
-					for(int k = 0; k < 256; k++)
-						delete [] rgbArray[j][k];
-				for(int i = 0; i < 256; i++)
-					delete [] rgbArray[i];
-				delete [] rgbArray;
-
-		doRGBArray = false;
-	}
-
 	classifiedSkinMutex.unlock();
 }
 
@@ -668,103 +367,15 @@ void ImageProcessor::doCanny()
 	cannyEdgesMutex.unlock();
 }
 
-void ImageProcessor::morphologyDilation()
-{
-	cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size( 2*dilateSize + 1, 2*dilateSize+1 ), cv::Point( dilateSize, dilateSize ) );
-	dilatedMutex.lock();
-	cv::dilate(classifiedSkinBin, dilated, element);
-	dilatedMutex.unlock();
-}
-
-void ImageProcessor::mergePixelsAndCanny(bool horizontal)
-{
-	int X = 0, Y = 0;
-	if(horizontal)
-	{
-		X = classifiedSkinBin.rows;
-		Y = classifiedSkinBin.cols;
-	} else {
-		X = classifiedSkinBin.cols;
-		Y = classifiedSkinBin.rows;
-	}
-	pixelsAndCannyMutex.lock();
-	if(horizontal)
-		pixelsAndCanny = dilated.clone();
-	#pragma omp parallel num_threads(OPENMP_THREADS)
-	{
-		long colors[2] = {0, 0};
-		#pragma omp for
-		for(int i = 0; i < X; i++)
-		{
-			colors[BLACK] = colors[WHITE] = 0;
-			int lastCorner = 0;
-			for(int j = 0; j < Y; j++)
-			{
-				uchar cannyPixel;
-				uchar classifiedPixel;
-				if(horizontal)
-				{
-					classifiedPixel = classifiedSkinBin.at<uchar>(i, j);
-					cannyPixel = dilated.at<uchar>(i,j);
-				} else {
-					classifiedPixel = classifiedSkinBin.at<uchar>(j, i);
-					cannyPixel = dilated.at<uchar>(j, i);
-				}
-
-				if(cannyPixel > 0)
-				{
-					uchar currentColor = 255;
-					if(colors[BLACK] > colors[WHITE])
-						currentColor = 0;
-					for(int k = lastCorner; k < j; k++)
-					{
-						if(horizontal)
-							pixelsAndCanny.at<uchar>(i, k) = currentColor;
-						else 
-							pixelsAndCanny.at<uchar>(k, i) = currentColor;
-					}
-					lastCorner = j + 1;
-					colors[BLACK] = colors[WHITE] = 0;
-				}
-				else
-				{
-					if(!classifiedPixel)
-						colors[BLACK]++;
-					else 
-						colors[WHITE]++;
-				}
-			}
-		}
-	}
-	pixelsAndCannyMutex.unlock();
-}
-
-void ImageProcessor::morphologyErode()
-{
-	cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size( 2*erodeSize + 1, 2*erodeSize+1 ), cv::Point( erodeSize, erodeSize ) );
-	erodedMutex.lock();
-	cv::erode(dilated, eroded, element);
-	erodedMutex.unlock();
-}
-
-void ImageProcessor::morphologyOpening()
-{
-	cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size( 2*openedMatSize + 1, 2*openedMatSize+1 ), cv::Point( openedMatSize, openedMatSize ) );
-	openedMatMutex.lock();
-	cv::morphologyEx(eroded, openedMat, cv::MORPH_OPEN, element);
-	opened8Mat = openedMat.clone();					 // ATTENTION! DIRTY HACK!
-	cv::cvtColor(openedMat, openedMat, CV_GRAY2RGB); // ATTENTION! DIRTY HACK!
-	openedMatMutex.unlock();
-}
-
 bool ImageProcessor::handRecognition()
 {
 	recognizedHandMutex.lock();
+	cv::cvtColor(classifiedSkin, bended, CV_GRAY2RGB);
 	recognizedHand = frame.clone();
 	dissimilarityMeasure.clear();
 	std::vector<QString>().swap(dissimilarityMeasure);
 	std::vector<std::vector<cv::Point>> contours;
-	cv::findContours(opened8Mat, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+	cv::findContours(classifiedSkin, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 	std::vector<std::vector<cv::Point>> mergedContours = contours;
 	for( int i = 0; i < contours.size(); i++ ) {
 		cv::Rect boundRect = cv::boundingRect(cv::Mat(contours[i]));
@@ -775,25 +386,6 @@ bool ImageProcessor::handRecognition()
 		{
 			if(SHOW_CONTOURS)
 			{
-				/*std::vector<cv::Point> tmpv;
-				for(int pointI = 0; pointI < contours[i].size(); pointI++) 
-				{
-					int neighbours = 0;
-					for(int pointJ = 0; pointJ < contours[i].size(); pointJ++) 
-					{
-						if( contours[i][pointI] == contours[i][pointJ] )
-							continue;
-						if( abs(contours[i][pointI].x - contours[i][pointJ].x) > 1 )
-							continue;
-						if( abs(contours[i][pointI].y - contours[i][pointJ].y) > 1 )
-							continue;
-						neighbours++;
-					}
-					if(neighbours == 2)
-						tmpv.push_back(contours[i][pointI]);
-				}
-				mergedContours[i] = contours[i] = tmpv;*/
-
 				int startPoint = 0;
 				cv::Point assignedPoint(-1, -1);
 				// Find start point
@@ -831,23 +423,23 @@ bool ImageProcessor::handRecognition()
 				}
 				
 				// Contour filling. White color
-				cv::drawContours(openedMat, mergedContours, i, cv::Scalar(255, 255, 255), -1);
+				cv::drawContours(bended, mergedContours, i, cv::Scalar(255, 255, 255), -1);
 			}
 			boundRect = cv::boundingRect(cv::Mat(mergedContours[i]));
-			cv::Mat applicant = openedMat(boundRect).clone();
+			cv::Mat applicant = bended(boundRect).clone();
 			cv::bitwise_not(applicant, applicant);
 			QString result;
 			try {
 				result = handRecCommands(applicant);
 			} catch(std::exception &e) {
-				emit error(e.what(), CRITICAL);
+				emit error(e.what(), QMessageBox::Critical);
 				recognizedHandMutex.unlock();
 				return false;
 			}
 			if(SHOW_CONTOURS)
 			{
-				cv::drawContours(openedMat, contours, i, cv::Scalar(0, 0, 255), 1);
-				cv::drawContours(openedMat, mergedContours, i, cv::Scalar(0, 255, 0), 1);
+				cv::drawContours(bended, contours, i, cv::Scalar(0, 0, 255), 1);
+				cv::drawContours(bended, mergedContours, i, cv::Scalar(0, 255, 0), 1);
 			}
 			if(result.toDouble() <= handThreshold) {
 				cv::drawContours(recognizedHand, mergedContours, i, cv::Scalar(0, 255, 255), 1);
@@ -922,13 +514,3 @@ cv::Point ImageProcessor::getNearestCannyPoint(cv::Point contourPoint, cv::Point
 	}
 	return nearestPoint;
 }
-
-void ImageProcessor::BGR2Gray(const cv::Mat& src, cv::Mat& dst)	// NOT USED
-{
-	for(int i = 0; i < src.rows; i++)
-		for(int j = 0; j < src.cols; j++)
-			dst.at<uchar>(i, j) = ( (0.3 * src.at<cv::Vec3b>(i, j).val[0]) + (0.3 * src.at<cv::Vec3b>(i, j).val[1]) + (0.4 * src.at<cv::Vec3b>(i, j).val[2]) );
-}
-
-ImageProcessor::~ImageProcessor()
-{}

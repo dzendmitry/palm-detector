@@ -25,7 +25,7 @@
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabPhoto">
        <attribute name="title">
@@ -555,8 +555,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>178</width>
-                <height>265</height>
+                <width>98</width>
+                <height>153</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -981,349 +981,9 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tabDilation">
-       <attribute name="title">
-        <string>3: Dilation</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_8">
-        <item row="0" column="0">
-         <widget class="QGroupBox" name="groupBoxDilation">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>200</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="title">
-           <string>Parameters</string>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_8">
-           <item>
-            <widget class="QScrollArea" name="scrollArea_5">
-             <property name="widgetResizable">
-              <bool>true</bool>
-             </property>
-             <widget class="QWidget" name="scrollAreaWidgetContents_5">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>178</width>
-                <height>421</height>
-               </rect>
-              </property>
-              <layout class="QVBoxLayout" name="verticalLayout_10">
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout_11">
-                 <item>
-                  <layout class="QHBoxLayout" name="horizontalLayout_9">
-                   <item>
-                    <widget class="QLabel" name="labelDilateSize">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>20</width>
-                       <height>0</height>
-                      </size>
-                     </property>
-                     <property name="text">
-                      <string>Dilation size:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QLabel" name="labelDilateSizeValue">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>0</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item>
-                  <widget class="QSlider" name="horizontalSliderDilate">
-                   <property name="maximum">
-                    <number>20</number>
-                   </property>
-                   <property name="pageStep">
-                    <number>2</number>
-                   </property>
-                   <property name="value">
-                    <number>0</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="tickPosition">
-                    <enum>QSlider::TicksBelow</enum>
-                   </property>
-                   <property name="tickInterval">
-                    <number>2</number>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <spacer name="verticalSpacer_4">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>347</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-              </layout>
-             </widget>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="labelDilate">
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Sunken</enum>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tabCannySkin">
-       <attribute name="title">
-        <string>4: Canny + Skin</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_7">
-        <item row="0" column="0">
-         <widget class="QGroupBox" name="groupBoxCannySkinParams">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>200</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="title">
-           <string>Parameters</string>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_10">
-           <item row="0" column="0">
-            <widget class="QScrollArea" name="scrollArea_2">
-             <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
-             <property name="widgetResizable">
-              <bool>true</bool>
-             </property>
-             <widget class="QWidget" name="scrollAreaWidgetContents_2">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>178</width>
-                <height>421</height>
-               </rect>
-              </property>
-             </widget>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="labelCannySkin">
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Sunken</enum>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tabErode">
-       <attribute name="title">
-        <string>5: Erode</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_11">
-        <item row="0" column="0">
-         <widget class="QGroupBox" name="groupBoxErode">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>200</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="title">
-           <string>Parameters</string>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_10">
-           <item>
-            <widget class="QScrollArea" name="scrollArea_6">
-             <property name="widgetResizable">
-              <bool>true</bool>
-             </property>
-             <widget class="QWidget" name="scrollAreaWidgetContents_6">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>178</width>
-                <height>421</height>
-               </rect>
-              </property>
-              <layout class="QVBoxLayout" name="verticalLayout_12">
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout_13">
-                 <item>
-                  <layout class="QHBoxLayout" name="horizontalLayout_11">
-                   <item>
-                    <widget class="QLabel" name="labelErodeSize">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>20</width>
-                       <height>0</height>
-                      </size>
-                     </property>
-                     <property name="text">
-                      <string>Erode size:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QLabel" name="labelErodeSizeValue">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>0</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item>
-                  <widget class="QSlider" name="horizontalSliderErode">
-                   <property name="maximum">
-                    <number>20</number>
-                   </property>
-                   <property name="pageStep">
-                    <number>2</number>
-                   </property>
-                   <property name="value">
-                    <number>0</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="tickPosition">
-                    <enum>QSlider::TicksBelow</enum>
-                   </property>
-                   <property name="tickInterval">
-                    <number>2</number>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <spacer name="verticalSpacer_5">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>271</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-              </layout>
-             </widget>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="labelErode">
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Sunken</enum>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
       <widget class="QWidget" name="tabOpening">
        <attribute name="title">
-        <string>6: Opening</string>
+        <string>3: Bend</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_12">
         <item row="0" column="0">
@@ -1354,138 +1014,11 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>178</width>
-                <height>421</height>
+                <width>98</width>
+                <height>71</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_14">
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout_15">
-                 <item>
-                  <layout class="QHBoxLayout" name="horizontalLayout_13">
-                   <item>
-                    <widget class="QLabel" name="labelOpeningSize">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>20</width>
-                       <height>0</height>
-                      </size>
-                     </property>
-                     <property name="text">
-                      <string>Opening size:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QLabel" name="labelOpeningSizeValue">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string/>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item>
-                  <widget class="QSlider" name="horizontalSliderOpening">
-                   <property name="maximum">
-                    <number>20</number>
-                   </property>
-                   <property name="pageStep">
-                    <number>2</number>
-                   </property>
-                   <property name="value">
-                    <number>20</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="tickPosition">
-                    <enum>QSlider::TicksBelow</enum>
-                   </property>
-                   <property name="tickInterval">
-                    <number>2</number>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout_18">
-                 <item>
-                  <layout class="QHBoxLayout" name="horizontalLayout_17">
-                   <item>
-                    <widget class="QLabel" name="labelApproxPoly">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>20</width>
-                       <height>0</height>
-                      </size>
-                     </property>
-                     <property name="text">
-                      <string>Contour approx.:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QLabel" name="labelApproxPolyValue">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string/>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item>
-                  <widget class="QSlider" name="horizontalSliderApproxPoly">
-                   <property name="minimum">
-                    <number>0</number>
-                   </property>
-                   <property name="maximum">
-                    <number>200</number>
-                   </property>
-                   <property name="pageStep">
-                    <number>5</number>
-                   </property>
-                   <property name="sliderPosition">
-                    <number>50</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="tickPosition">
-                    <enum>QSlider::TicksBelow</enum>
-                   </property>
-                   <property name="tickInterval">
-                    <number>2</number>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
                <item>
                 <layout class="QVBoxLayout" name="verticalLayout_19">
                  <item>
@@ -1591,7 +1124,7 @@
       </widget>
       <widget class="QWidget" name="tabHand">
        <attribute name="title">
-        <string>7: Hand</string>
+        <string>4: Hand</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_22">
         <item row="0" column="0">
@@ -1622,8 +1155,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>178</width>
-                <height>421</height>
+                <width>98</width>
+                <height>124</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_33">
