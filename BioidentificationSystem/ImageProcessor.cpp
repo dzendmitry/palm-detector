@@ -386,6 +386,7 @@ bool ImageProcessor::handRecognition()
 		{
 			if(SHOW_CONTOURS)
 			{
+				clock_t bendingStartTime = clock();
 				int startPoint = 0;
 				cv::Point assignedPoint(-1, -1);
 				// Find start point
@@ -422,15 +423,25 @@ bool ImageProcessor::handRecognition()
 					}
 				}
 				
+				if(DEBUG) {
+					writeTime("BENDING", ((float)(clock()-bendingStartTime))/CLOCKS_PER_SEC);
+				}
+
 				// Contour filling. White color
 				cv::drawContours(bended, mergedContours, i, cv::Scalar(255, 255, 255), -1);
 			}
 			boundRect = cv::boundingRect(cv::Mat(mergedContours[i]));
-			cv::Mat applicant = bended(boundRect).clone();
+			cv::Mat applicant(bended.rows, bended.cols, CV_8UC3);
+			cv::drawContours(applicant, mergedContours, i, cv::Scalar(255, 255, 255), -1);
+			applicant = applicant(boundRect).clone();
 			cv::bitwise_not(applicant, applicant);
 			QString result;
 			try {
+				clock_t handRecStartTime = clock();
 				result = handRecCommands(applicant);
+				if(DEBUG) {
+					writeTime("HAND_REC_PROC", ((float)(clock()-handRecStartTime))/CLOCKS_PER_SEC);
+				}
 			} catch(std::exception &e) {
 				emit error(e.what(), QMessageBox::Critical);
 				recognizedHandMutex.unlock();
