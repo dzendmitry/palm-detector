@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>ico/camera_off_24x24.ico</file>
+        <file>ico/camera_on_24x24.ico</file>
+        <file>ico/take_photo_24x24.ico</file>
+        <file>ico/palm_24x24.ico</file>
+        <file>ico/draw_rectangle_24x24.ico</file>
+        <file>ico/previous_step_24x24.ico</file>
+        <file>ico/save_24x24.ico</file>
+        <file>ico/save_as_24x24.ico</file>
+        <file>ico/process_24x24.ico</file>
+        <file>ico/settings_24x24.ico</file>
+        <file>ico/photo_mode_24x24.ico</file>
+        <file>ico/retrain_24x24.ico</file>
+        <file>ico/apply_24x24.ico</file>
+        <file>ico/crop_24x24.ico</file>
+        <file>ico/draw_24x24.ico</file>
+        <file>ico/switch_colors_24x24.ico</file>
+        <file>ico/open_24x24.ico</file>
+    </qresource>
+</RCC>
