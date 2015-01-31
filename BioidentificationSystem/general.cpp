@@ -4,9 +4,58 @@
 #include <QTime>
 
 #include <windows.h>
+#include <time.h>
+#include <gdiplus.h>
+using namespace Gdiplus;
 
 #include "general.h"
 FILE *logFile;
+
+int GetEncoderClsid(const WCHAR* format, CLSID* pClsid) {
+	UINT  num = 0;          // number of image encoders
+	UINT  size = 0;         // size of the image encoder array in bytes
+
+	ImageCodecInfo* pImageCodecInfo = NULL;
+
+	GetImageEncodersSize(&num, &size);
+	if(size == 0)
+		return -1;  // Failure
+
+	pImageCodecInfo = (ImageCodecInfo*)(malloc(size));
+	if(pImageCodecInfo == NULL)
+		return -1;  // Failure
+
+	GetImageEncoders(num, size, pImageCodecInfo);
+
+	for(UINT j = 0; j < num; ++j)
+	{
+		if( wcscmp(pImageCodecInfo[j].MimeType, format) == 0 )
+		{
+			*pClsid = pImageCodecInfo[j].Clsid;
+			free(pImageCodecInfo);
+			return j;  // Success
+		}
+	}
+	free(pImageCodecInfo);
+	return -1;  // Failure
+}
+
+void saveBMP(QImage& img) {
+	GdiplusStartupInput gdiplusStartupInput;
+	ULONG_PTR gdiplusToken;
+	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+
+	Bitmap *image = new Bitmap(img.width(), img.height(), img.bytesPerLine(), PixelFormat1bppIndexed, (BYTE*)img.bits());
+
+	CLSID myClsId;
+	int retVal = GetEncoderClsid(L"image/bmp", &myClsId);
+
+	Status s = image->Save(L"hand.bmp", &myClsId, NULL);
+	
+	delete image;
+
+	GdiplusShutdown(gdiplusToken);
+}
 
 QImage Mat2QImage(const cv::Mat &frame)
 {
@@ -112,65 +161,61 @@ QString getImagePath(const QString& path)
 
 QString handRecCommands(const cv::Mat &spot)
 {
-	cv::Mat img = spot.clone();
+	cv::Mat _img = spot.clone();
 	// Top border, Bottom border
-	for(int j = 0; j < img.cols; j++) {
-		img.at<cv::Vec3b>(0, j) = cv::Vec3b(255, 255, 255);
-		img.at<cv::Vec3b>(img.rows - 1, j) = cv::Vec3b(255, 255, 255);
+	for(int j = 0; j < _img.cols; j++) {
+		_img.at<cv::Vec3b>(0, j) = cv::Vec3b(0, 0, 0);
+		_img.at<cv::Vec3b>(_img.rows - 1, j) = cv::Vec3b(0, 0, 0);
 	}
 	// Left border, Right border
-	for(int i = 0; i < img.rows; i++) {
-		img.at<cv::Vec3b>(i, 0) = cv::Vec3b(255, 255, 255);
-		img.at<cv::Vec3b>(i, img.cols - 1) = cv::Vec3b(255, 255, 255);
+	for(int i = 0; i < _img.rows; i++) {
+		_img.at<cv::Vec3b>(i, 0) = cv::Vec3b(0, 0, 0);
+		_img.at<cv::Vec3b>(i, _img.cols - 1) = cv::Vec3b(0, 0, 0);
 	}
+
+	QImage img = Mat2QImage(_img);
+	img = img.convertToFormat(QImage::Format_Mono, Qt::MonoOnly);
 
 	QDir dir;
 	if(!dir.exists(HANDS_COMPARE_DIR) || !dir.setCurrent(HANDS_COMPARE_DIR))
 		throw std::exception((QString("Dir ") + HANDS_COMPARE_DIR + " doesn't exist or can't be changed.").toAscii().data());
 
-	if(saveImage(img, HANDS_BMP_NAME, "./").isEmpty())
-		throw std::exception((QString("Saving ") + HANDS_BMP_NAME + " error.").toAscii().data());
-	QStringList delEntries = dir.entryList(QStringList() << SKL_FILTER << SEQ_FILTER);
+	/*if(saveImage(img, HANDS_BMP_NAME, "./").isEmpty())
+		throw std::exception((QString("Saving ") + HANDS_BMP_NAME + " error.").toAscii().data());*/
+	saveBMP(img);
+	QStringList delEntries = dir.entryList(QStringList() << SEQ_FILTER);
 	foreach(const QString& entry, delEntries)
 		dir.remove(entry);
 
+	clock_t handRecStartTime = clock();
 	STARTUPINFOW si;
 	PROCESS_INFORMATION pi;
 	// Command 1
 	ZeroMemory(&si, sizeof(si));
 	si.cb = sizeof(si);
 	ZeroMemory(&pi, sizeof(pi));
-	if(CreateProcessW(L"C:\\windows\\system32\\cmd.exe", const_cast<LPWSTR>((QString("/C dataFromSkel.exe -p ") + QString::number(REGULARIZATION) + " " + STANDARD_HAND_BMP_NAME + " out1.skl").toStdWString().data()), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
+	if(CreateProcessW(L"C:\\windows\\system32\\cmd.exe", const_cast<LPWSTR>((QString("/C BmpToSeq.exe ") + QString::number(REGULARIZATION) + " " + QString::number(APPROXIMATION) + " " + QString::number(MERGING) + " " + QString::number(LEGANDRES) + " " + HANDS_BMP_NAME + " hand.seq").toStdWString().data()), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
 	{
 		WaitForSingleObject(pi.hProcess, INFINITE);
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
 	} else
-		throw std::exception((QString("dataFromSkel.exe ") + STANDARD_HAND_BMP_NAME + " failed.").toAscii().data());
-
-	// Command 2
-	ZeroMemory(&si, sizeof(si));
-	si.cb = sizeof(si);
-	ZeroMemory(&pi, sizeof(pi));
-	if(CreateProcessW(L"C:\\windows\\system32\\cmd.exe", const_cast<LPWSTR>((QString("/C dataFromSkel.exe -p ") + QString::number(REGULARIZATION) + " " + HANDS_BMP_NAME + " out2.skl").toStdWString().data()), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
-	{
-		WaitForSingleObject(pi.hProcess, INFINITE);
-		CloseHandle(pi.hProcess);
-		CloseHandle(pi.hThread);
-	} else
-		throw std::exception((QString("dataFromSkel.exe ") + HANDS_BMP_NAME + " failed.").toAscii().data());
+		throw std::exception((QString("BmpToSeq.exe ") + HANDS_BMP_NAME + " failed.").toAscii().data());
 
 	// Command 3
 	ZeroMemory(&si, sizeof(si));
 	si.cb = sizeof(si);
 	ZeroMemory(&pi, sizeof(pi));
-	if(CreateProcessW(L"C:\\windows\\system32\\cmd.exe", const_cast<LPWSTR>((QString("/C StringCompare.exe ") + QString::number(APPROXIMATION) + " " + QString::number(APPROXIMATION) + " 4 out1.skl out2.skl 0.2").toStdWString().data()), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
+	if(CreateProcessW(L"C:\\windows\\system32\\cmd.exe", const_cast<LPWSTR>((QString("/C StringCompare.exe etalon.seq hand.seq ") + QString::number(MULCT)).toStdWString().data()), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
 	{
 		WaitForSingleObject(pi.hProcess, INFINITE);
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
 	} else
 		throw std::exception("StringCompare.exe error.");
+	if(DEBUG) {
+		writeTime("HAND_REC_COMMANDS", ((float)(clock()-handRecStartTime))/CLOCKS_PER_SEC);
+	}
 
 	// Read result
 	QFile resultFile(DISSIMILARITY_MEASURE);

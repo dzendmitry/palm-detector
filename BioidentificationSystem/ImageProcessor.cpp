@@ -434,12 +434,11 @@ bool ImageProcessor::handRecognition()
 			cv::Mat applicant(bended.rows, bended.cols, CV_8UC3);
 			cv::drawContours(applicant, mergedContours, i, cv::Scalar(255, 255, 255), -1);
 			applicant = applicant(boundRect).clone();
-			cv::Mat applicantContoursMat;
-			cv::cvtColor(applicant, applicantContoursMat, CV_BGR2GRAY);
-			std::vector<std::vector<cv::Point>> appContours;
-			cv::findContours(applicantContoursMat, appContours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-			cv::drawContours(applicant, appContours, -1, cv::Scalar(255, 255, 255), -1);
-			cv::bitwise_not(applicant, applicant);
+			cv::Mat applicantClone;
+			cv::cvtColor(applicant, applicantClone, CV_BGR2GRAY);
+			std::vector<std::vector<cv::Point>> applicantContours;
+			cv::findContours(applicantClone, applicantContours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+			cv::drawContours(applicant, applicantContours, -1, cv::Scalar(255, 255, 255), -1);
 			QString result;
 			try {
 				clock_t handRecStartTime = clock();
