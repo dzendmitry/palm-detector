@@ -14,7 +14,7 @@ ImageProcessor::ImageProcessor(QObject *parent)
 	ratio = RATIO;
 	aperture = APERTURE;
 	cannyContourMergeEps = CANNY_CONTOUR_MERGE_EPS;
-	handThreshold = HAND_THRESHOLD / 10.0;
+	handThreshold = HAND_THRESHOLD / 100.0;
 	approxPoly = APPROX_POLY;
 	topHandThres = TOP_HAND_THRES;
 	qRegisterMetaType<ImageProcessor::States>("ImageProcessor::States");
@@ -439,6 +439,7 @@ bool ImageProcessor::handRecognition()
 			std::vector<std::vector<cv::Point>> applicantContours;
 			cv::findContours(applicantClone, applicantContours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 			cv::drawContours(applicant, applicantContours, -1, cv::Scalar(255, 255, 255), -1);
+			onePixelBorder(applicant);
 			QString result;
 			try {
 				clock_t handRecStartTime = clock();

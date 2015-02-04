@@ -105,7 +105,7 @@ public slots:
 	void setCannyContourMergeEps(int cannyContourMergeEps)
 		{ this->cannyContourMergeEps = cannyContourMergeEps; }
 	void setHandThres(int handThreshold)
-		{ this->handThreshold = handThreshold / 10.0; }
+		{ this->handThreshold = handThreshold / 100.0; }
 	void setTopHandThres(int topHandThres)
 		{ this->topHandThres = topHandThres; }
 	void setApproxPoly(int approxPoly)

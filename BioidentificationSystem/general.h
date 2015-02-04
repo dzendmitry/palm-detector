@@ -45,11 +45,11 @@ const QString SKL_FILTER = "*.skl";
 const QString SEQ_FILTER = "hand.seq";
 const QString DISSIMILARITY_MEASURE = "DissimilarityMeasure.txt";
 const int REGULARIZATION = 3;
-const double APPROXIMATION = 0.05;
+const double APPROXIMATION = 0.03;
 const double MERGING = 0.08;
 const int LEGANDRES = 4;
 const double MULCT = 0.2;
-const int HAND_THRESHOLD = 22;
+const int HAND_THRESHOLD = 38;
 const int APPROX_POLY = 0;
 const int MIN_WH = 50;
 const int TOP_HAND_THRES = 2;
@@ -77,6 +77,8 @@ QString getImageName(const QString& path);
 QString getImagePath(const QString& path);
 
 QString handRecCommands(const cv::Mat &spot);
+
+void onePixelBorder(cv::Mat& img);
 
 // LOG
 const char* const logFileName = "log.txt";

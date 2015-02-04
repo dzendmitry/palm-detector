@@ -40,7 +40,7 @@ int GetEncoderClsid(const WCHAR* format, CLSID* pClsid) {
 	return -1;  // Failure
 }
 
-void saveBMP(QImage& img) {
+void saveBMP(QImage& img, QString path = "hand.bmp") {
 	GdiplusStartupInput gdiplusStartupInput;
 	ULONG_PTR gdiplusToken;
 	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
@@ -50,7 +50,7 @@ void saveBMP(QImage& img) {
 	CLSID myClsId;
 	int retVal = GetEncoderClsid(L"image/bmp", &myClsId);
 
-	Status s = image->Save(L"hand.bmp", &myClsId, NULL);
+	Status s = image->Save(path.toStdWString().c_str(), &myClsId, NULL);
 	
 	delete image;
 
@@ -159,21 +159,9 @@ QString getImagePath(const QString& path)
 	return pathList.join("/") + "/";
 }
 
-QString handRecCommands(const cv::Mat &spot)
+QString handRecCommands(const cv::Mat &candidate)
 {
-	cv::Mat _img = spot.clone();
-	// Top border, Bottom border
-	for(int j = 0; j < _img.cols; j++) {
-		_img.at<cv::Vec3b>(0, j) = cv::Vec3b(0, 0, 0);
-		_img.at<cv::Vec3b>(_img.rows - 1, j) = cv::Vec3b(0, 0, 0);
-	}
-	// Left border, Right border
-	for(int i = 0; i < _img.rows; i++) {
-		_img.at<cv::Vec3b>(i, 0) = cv::Vec3b(0, 0, 0);
-		_img.at<cv::Vec3b>(i, _img.cols - 1) = cv::Vec3b(0, 0, 0);
-	}
-
-	QImage img = Mat2QImage(_img);
+	QImage img = Mat2QImage(candidate);
 	img = img.convertToFormat(QImage::Format_Mono, Qt::MonoOnly);
 
 	QDir dir;
@@ -227,6 +215,19 @@ QString handRecCommands(const cv::Mat &spot)
 	QString result(byteArray);
 	dir.setCurrent("..");
 	return result;
+}
+
+void onePixelBorder(cv::Mat& img) {
+	// Top border, Bottom border
+	for(int j = 0; j < img.cols; j++) {
+		img.at<cv::Vec3b>(0, j) = cv::Vec3b(0, 0, 0);
+		img.at<cv::Vec3b>(img.rows - 1, j) = cv::Vec3b(0, 0, 0);
+	}
+	// Left border, Right border
+	for(int i = 0; i < img.rows; i++) {
+		img.at<cv::Vec3b>(i, 0) = cv::Vec3b(0, 0, 0);
+		img.at<cv::Vec3b>(i, img.cols - 1) = cv::Vec3b(0, 0, 0);
+	}
 }
 
 void writeTime(const char* stage, float time)
