@@ -15,7 +15,7 @@ public:
 		: QDialog(parent) {
 			ui.setupUi(this);
 			connect(ui.checkBoxDebug, SIGNAL(clicked(bool)), this, SLOT(changeDebugMode(bool)));
-			connect(ui.checkBoxCanny, SIGNAL(clicked(bool)), this, SLOT(changeCannyMode(bool)));
+			//connect(ui.checkBoxCanny, SIGNAL(clicked(bool)), this, SLOT(changeCannyMode(bool)));
 			connect(ui.checkBoxShowContours, SIGNAL(clicked(bool)), this, SLOT(changeShowContoursMode(bool)));
 	}
 

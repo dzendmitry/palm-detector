@@ -315,7 +315,7 @@ private:
 
 	void initConnections()
 	{
-		connect(ui.pushButtonMakeExp, SIGNAL(clicked()), imageProcessor, SLOT(makeExp()));
+		//connect(ui.pushButtonMakeExp, SIGNAL(clicked()), imageProcessor, SLOT(makeExp()));
 		connect(changeCameraState, SIGNAL(toggled(bool)), imageProcessor, SLOT(imageProcState(bool)));
 		connect(setPhotoMode, SIGNAL(toggled(bool)), imageProcessor, SLOT(setPhotoMode(bool)));
 		connect(imageProcessor, SIGNAL(photoModeChanged()), ui.statusBar, SLOT(clearMessage()));
@@ -348,17 +348,17 @@ private:
 		connect(ui.horizontalSliderS, SIGNAL(valueChanged(int)), imageProcessor, SLOT(setKernelParamS(int)));
 		ui.horizontalSliderS->setValue(KERNEL_PARAM_S);
 
-		connect(ui.horizontalSliderAperture, SIGNAL(valueChanged(int)), ui.labelApertureValue, SLOT(setNum(int)));
+		/*connect(ui.horizontalSliderAperture, SIGNAL(valueChanged(int)), ui.labelApertureValue, SLOT(setNum(int)));
 		connect(ui.horizontalSliderAperture, SIGNAL(valueChanged(int)), imageProcessor, SLOT(setApertureFilter(int)));
-		ui.horizontalSliderAperture->setValue(APERTURE_FILTER);
+		ui.horizontalSliderAperture->setValue(APERTURE_FILTER);*/
 
 		connect(ui.horizontalSliderLowThreshold, SIGNAL(valueChanged(int)), ui.labelLowThresholdValue, SLOT(setNum(int)));
 		connect(ui.horizontalSliderLowThreshold, SIGNAL(valueChanged(int)), imageProcessor, SLOT(setLowThreshold(int)));
 		ui.horizontalSliderLowThreshold->setValue(LOW_THRESHOLD);
 
-		connect(ui.horizontalSliderAperture_2, SIGNAL(valueChanged(int)), ui.labelApertureValue_2, SLOT(setNum(int)));
+		/*connect(ui.horizontalSliderAperture_2, SIGNAL(valueChanged(int)), ui.labelApertureValue_2, SLOT(setNum(int)));
 		connect(ui.horizontalSliderAperture_2, SIGNAL(valueChanged(int)), imageProcessor, SLOT(setAperture(int)));
-		ui.horizontalSliderAperture_2->setValue(APERTURE);
+		ui.horizontalSliderAperture_2->setValue(APERTURE);*/
 
 		connect(ui.horizontalSliderRatio, SIGNAL(valueChanged(int)), ui.labelRatioValue, SLOT(setNum(int)));
 		connect(ui.horizontalSliderRatio, SIGNAL(valueChanged(int)), imageProcessor, SLOT(setRatio(int)));

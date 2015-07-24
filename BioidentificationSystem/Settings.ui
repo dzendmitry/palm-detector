@@ -35,16 +35,6 @@
      </widget>
     </item>
     <item>
-     <widget class="QCheckBox" name="checkBoxCanny">
-      <property name="text">
-       <string>Canny</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item>
      <widget class="QCheckBox" name="checkBoxShowContours">
       <property name="text">
        <string>Show contours</string>
